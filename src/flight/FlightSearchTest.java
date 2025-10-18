@@ -4,23 +4,53 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-//Student Name:Rupshree Bhadra-s4131551
-/**
+
+/*
  * JUnit 5 tests for FlightSearch.runFlightSearch
- * Spec notes:
- * - All STRING inputs for tests are lowercase (airport codes, seating class).
+ *
+ * Notes:
+ * - All STRING inputs for tests are lowercase (airport codes, seating class) except C12-B.
  * - Dates use strict DD/MM/YYYY and are chosen to be valid unless the case is meant to be invalid.
- * - Each condition C1..C12 has TWO datasets (A = usually boundary-valid, B = boundary-invalid).
- * - The final "all-valid" scenario has FOUR distinct valid datasets.
- * - We print the "Actual" value so you can copy it into your results sheet.
+ * - Each condition C1 - C12 has two datasets (A = usually valid-boundary, B = Invalid-boundary).
+ * - The final "all-valid" scenario has 4 distinct valid Datasets
+ * - Every test asserts the boolean result AND the object's state(initialised on success; unaffected on failure).
  */
 public class FlightSearchTest {
 
-    // Handy constants (future dates so "not in past" holds)
-    private static final String D1 = "10/12/2026";
-    private static final String R1 = "15/12/2026";
-    private static final String D2 = "12/12/2026";
-    private static final String R2 = "18/12/2026";
+ 
+    private static void assertStateUnchanged(FlightSearch f) {
+        assertNull(f.getDepartureDate());
+        assertNull(f.getDepartureAirportCode());
+        assertFalse(f.isEmergencyRowSeating());
+        assertNull(f.getReturnDate());
+        assertNull(f.getDestinationAirportCode());
+        assertNull(f.getSeatingClass());
+        assertEquals(0, f.getAdultPassengerCount());
+        assertEquals(0, f.getChildPassengerCount());
+        assertEquals(0, f.getInfantPassengerCount());
+    }
+
+    private static void assertStateEquals(
+            FlightSearch f,
+            String dep, String depCode, boolean emer,
+            String ret, String dest, String cls,
+            int a, int c, int i) {
+        assertEquals(dep,     f.getDepartureDate());
+        assertEquals(depCode, f.getDepartureAirportCode());
+        assertEquals(emer,    f.isEmergencyRowSeating());
+        assertEquals(ret,     f.getReturnDate());
+        assertEquals(dest,    f.getDestinationAirportCode());
+        assertEquals(cls,     f.getSeatingClass());
+        assertEquals(a,       f.getAdultPassengerCount());
+        assertEquals(c,       f.getChildPassengerCount());
+        assertEquals(i,       f.getInfantPassengerCount());
+    }
+
+    // ---------- sample constants (future dates so "not in past" holds) ----------
+    private static final String D1   = "10/12/2026";
+    private static final String R1   = "15/12/2026";
+    private static final String D2   = "12/12/2026";
+    private static final String R2   = "18/12/2026";
     private static final String SAME = "22/12/2026";
     private static final String PAST = "01/01/2024";
 
@@ -33,6 +63,7 @@ public class FlightSearchTest {
         boolean actual = f.runFlightSearch(D1,"mel",false,R1,"pvg","economy",1,0,0);
         System.out.println("C1-A Actual=" + actual);
         assertTrue(actual);
+        assertStateEquals(f, D1,"mel",false,R1,"pvg","economy",1,0,0);
     }
 
     @Test @DisplayName("C1-B: total passengers just above upper invalid (total=10)")
@@ -41,6 +72,7 @@ public class FlightSearchTest {
         boolean actual = f.runFlightSearch(D2,"mel",false,R2,"pvg","economy",5,4,1); // 10 total
         System.out.println("C1-B Actual=" + actual);
         assertFalse(actual);
+        assertStateUnchanged(f);
     }
 
     // =========================================
@@ -52,6 +84,7 @@ public class FlightSearchTest {
         boolean actual = f.runFlightSearch(D1,"mel",false,R1,"pvg","economy",2,1,0);
         System.out.println("C2-A Actual=" + actual);
         assertTrue(actual);
+        assertStateEquals(f, D1,"mel",false,R1,"pvg","economy",2,1,0);
     }
 
     @Test @DisplayName("C2-B: child invalid (emergency row + child)")
@@ -60,6 +93,7 @@ public class FlightSearchTest {
         boolean actual = f.runFlightSearch(D1,"mel",true,R1,"pvg","economy",2,1,0);
         System.out.println("C2-B Actual=" + actual);
         assertFalse(actual);
+        assertStateUnchanged(f);
     }
 
     // ==========================================
@@ -71,6 +105,7 @@ public class FlightSearchTest {
         boolean actual = f.runFlightSearch(D1,"mel",false,R1,"pvg","business",2,0,1);
         System.out.println("C3-A Actual=" + actual);
         assertFalse(actual);
+        assertStateUnchanged(f);
     }
 
     @Test @DisplayName("C3-B: infant valid (economy, no emergency)")
@@ -79,6 +114,7 @@ public class FlightSearchTest {
         boolean actual = f.runFlightSearch(D1,"mel",false,R1,"pvg","economy",2,0,1);
         System.out.println("C3-B Actual=" + actual);
         assertTrue(actual);
+        assertStateEquals(f, D1,"mel",false,R1,"pvg","economy",2,0,1);
     }
 
     // ==========================================
@@ -90,6 +126,7 @@ public class FlightSearchTest {
         boolean actual = f.runFlightSearch(D1,"mel",false,R1,"pvg","economy",1,2,0);
         System.out.println("C4-A Actual=" + actual);
         assertTrue(actual);
+        assertStateEquals(f, D1,"mel",false,R1,"pvg","economy",1,2,0);
     }
 
     @Test @DisplayName("C4-B: just over invalid (1 adult, 3 children)")
@@ -98,6 +135,7 @@ public class FlightSearchTest {
         boolean actual = f.runFlightSearch(D2,"mel",false,R2,"pvg","economy",1,3,0);
         System.out.println("C4-B Actual=" + actual);
         assertFalse(actual);
+        assertStateUnchanged(f);
     }
 
     // ==========================================
@@ -109,6 +147,7 @@ public class FlightSearchTest {
         boolean actual = f.runFlightSearch(D1,"mel",false,R1,"pvg","economy",2,0,2);
         System.out.println("C5-A Actual=" + actual);
         assertTrue(actual);
+        assertStateEquals(f, D1,"mel",false,R1,"pvg","economy",2,0,2);
     }
 
     @Test @DisplayName("C5-B: invalid (1 adult, 2 infants)")
@@ -117,6 +156,7 @@ public class FlightSearchTest {
         boolean actual = f.runFlightSearch(D1,"mel",false,R1,"pvg","economy",1,0,2);
         System.out.println("C5-B Actual=" + actual);
         assertFalse(actual);
+        assertStateUnchanged(f);
     }
 
     // ==========================================
@@ -128,6 +168,7 @@ public class FlightSearchTest {
         boolean actual = f.runFlightSearch(D1,"mel",false,R1,"pvg","economy",1,0,0);
         System.out.println("C6-A Actual=" + actual);
         assertTrue(actual);
+        assertStateEquals(f, D1,"mel",false,R1,"pvg","economy",1,0,0);
     }
 
     @Test @DisplayName("C6-B: invalid past departure")
@@ -136,6 +177,7 @@ public class FlightSearchTest {
         boolean actual = f.runFlightSearch(PAST,"mel",false,R2,"pvg","economy",1,0,0);
         System.out.println("C6-B Actual=" + actual);
         assertFalse(actual);
+        assertStateUnchanged(f);
     }
 
     // =================================================
@@ -147,6 +189,7 @@ public class FlightSearchTest {
         boolean actual = f.runFlightSearch("29/02/2026","mel",false,"01/03/2026","pvg","economy",1,0,0);
         System.out.println("C7-A Actual=" + actual);
         assertFalse(actual);
+        assertStateUnchanged(f);
     }
 
     @Test @DisplayName("C7-B: 29/02/2028 valid (leap)")
@@ -155,6 +198,7 @@ public class FlightSearchTest {
         boolean actual = f.runFlightSearch("29/02/2028","mel",false,"02/03/2028","pvg","economy",1,0,0);
         System.out.println("C7-B Actual=" + actual);
         assertTrue(actual);
+        assertStateEquals(f, "29/02/2028","mel",false,"02/03/2028","pvg","economy",1,0,0);
     }
 
     // =================================================
@@ -166,6 +210,7 @@ public class FlightSearchTest {
         boolean actual = f.runFlightSearch(SAME,"mel",false,SAME,"pvg","economy",1,0,0);
         System.out.println("C8-A Actual=" + actual);
         assertTrue(actual);
+        assertStateEquals(f, SAME,"mel",false,SAME,"pvg","economy",1,0,0);
     }
 
     @Test @DisplayName("C8-B: invalid (return before departure)")
@@ -174,6 +219,7 @@ public class FlightSearchTest {
         boolean actual = f.runFlightSearch(D2,"mel",false,"11/12/2026","pvg","economy",1,0,0);
         System.out.println("C8-B Actual=" + actual);
         assertFalse(actual);
+        assertStateUnchanged(f);
     }
 
     // ==========================================
@@ -185,6 +231,7 @@ public class FlightSearchTest {
         boolean actual = f.runFlightSearch(D1,"mel",false,R1,"pvg","premium economy",1,0,0);
         System.out.println("C9-A Actual=" + actual);
         assertTrue(actual);
+        assertStateEquals(f, D1,"mel",false,R1,"pvg","premium economy",1,0,0);
     }
 
     @Test @DisplayName("C9-B: invalid (unknown class)")
@@ -193,6 +240,7 @@ public class FlightSearchTest {
         boolean actual = f.runFlightSearch(D1,"mel",false,R1,"pvg","super",1,0,0);
         System.out.println("C9-B Actual=" + actual);
         assertFalse(actual);
+        assertStateUnchanged(f);
     }
 
     // ==========================================
@@ -204,6 +252,7 @@ public class FlightSearchTest {
         boolean actual = f.runFlightSearch(D1,"mel",true,R1,"pvg","economy",2,0,0);
         System.out.println("C10-A Actual=" + actual);
         assertTrue(actual);
+        assertStateEquals(f, D1,"mel",true,R1,"pvg","economy",2,0,0);
     }
 
     @Test @DisplayName("C10-B: invalid (business + emergency)")
@@ -212,6 +261,7 @@ public class FlightSearchTest {
         boolean actual = f.runFlightSearch(D1,"mel",true,R1,"pvg","business",2,0,0);
         System.out.println("C10-B Actual=" + actual);
         assertFalse(actual);
+        assertStateUnchanged(f);
     }
 
     // ==========================================
@@ -223,6 +273,7 @@ public class FlightSearchTest {
         boolean actual = f.runFlightSearch(D1,"mel",false,R1,"pvg","economy",1,0,0);
         System.out.println("C11-A Actual=" + actual);
         assertTrue(actual);
+        assertStateEquals(f, D1,"mel",false,R1,"pvg","economy",1,0,0);
     }
 
     @Test @DisplayName("C11-B: invalid (mel -> mel)")
@@ -231,10 +282,11 @@ public class FlightSearchTest {
         boolean actual = f.runFlightSearch(D1,"mel",false,R1,"mel","economy",1,0,0);
         System.out.println("C11-B Actual=" + actual);
         assertFalse(actual);
+        assertStateUnchanged(f);
     }
 
     // ==========================================
-    // C12 — lowercase strings only (spec note)
+    // C12 — lowercase strings only 
     // ==========================================
     @Test @DisplayName("C12-A: valid (all lowercase)")
     void cond12A_lowercase_valid() {
@@ -242,6 +294,7 @@ public class FlightSearchTest {
         boolean actual = f.runFlightSearch(D1,"cdg",false,R1,"doh","business",2,0,0);
         System.out.println("C12-A Actual=" + actual);
         assertTrue(actual);
+        assertStateEquals(f, D1,"cdg",false,R1,"doh","business",2,0,0);
     }
 
     @Test @DisplayName("C12-B: invalid (uppercase airport/class)")
@@ -250,10 +303,11 @@ public class FlightSearchTest {
         boolean actual = f.runFlightSearch(D1,"MEL",false,R1,"pvg","ECONOMY",1,0,0);
         System.out.println("C12-B Actual=" + actual);
         assertFalse(actual);
+        assertStateUnchanged(f);
     }
 
     // =================================================
-    // All-valid scenario — four distinct valid combos
+    // All-valid scenario — four distinct valid combinations
     // =================================================
     @Test @DisplayName("Valid-A: economy (syd -> lax)")
     void validA_economy() {
@@ -261,6 +315,7 @@ public class FlightSearchTest {
         boolean actual = f.runFlightSearch(D1,"syd",false,R1,"lax","economy",1,0,0);
         System.out.println("Valid-A Actual=" + actual);
         assertTrue(actual);
+        assertStateEquals(f, D1,"syd",false,R1,"lax","economy",1,0,0);
     }
 
     @Test @DisplayName("Valid-B: economy + emergency (mel -> pvg)")
@@ -269,6 +324,7 @@ public class FlightSearchTest {
         boolean actual = f.runFlightSearch(D2,"mel",true,R2,"pvg","economy",2,0,0);
         System.out.println("Valid-B Actual=" + actual);
         assertTrue(actual);
+        assertStateEquals(f, D2,"mel",true,R2,"pvg","economy",2,0,0);
     }
 
     @Test @DisplayName("Valid-C: premium economy + children within ratio (cdg -> doh)")
@@ -277,6 +333,7 @@ public class FlightSearchTest {
         boolean actual = f.runFlightSearch("14/12/2026","cdg",false,"20/12/2026","doh","premium economy",2,2,0);
         System.out.println("Valid-C Actual=" + actual);
         assertTrue(actual);
+        assertStateEquals(f, "14/12/2026","cdg",false,"20/12/2026","doh","premium economy",2,2,0);
     }
 
     @Test @DisplayName("Valid-D: business (no infants) (del -> syd)")
@@ -285,5 +342,6 @@ public class FlightSearchTest {
         boolean actual = f.runFlightSearch("16/12/2026","del",false,"22/12/2026","syd","business",2,0,0);
         System.out.println("Valid-D Actual=" + actual);
         assertTrue(actual);
+        assertStateEquals(f, "16/12/2026","del",false,"22/12/2026","syd","business",2,0,0);
     }
 }

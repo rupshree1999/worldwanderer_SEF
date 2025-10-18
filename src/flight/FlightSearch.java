@@ -1,4 +1,4 @@
-package flight; // keep lowercase package
+package flight;
 //Student Name:Rupshree Bhadra-s4131551
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -8,7 +8,7 @@ import java.util.Set;
 
 public class FlightSearch {
 
-    // ====== Instance variables (state) ======
+ 
     private String  departureDate;            // dd/MM/yyyy (lowercase enforced globally)
     private String  departureAirportCode;     // one of allowed airports (lowercase)
     private boolean emergencyRowSeating;      // true only allowed with economy
@@ -19,14 +19,14 @@ public class FlightSearch {
     private int     childPassengerCount;
     private int     infantPassengerCount;
 
-    // ====== Constants ======
+    // ====== Define Constants ======
     private static final Set<String> ALLOWED_AIRPORTS =
             Set.of("syd","mel","lax","cdg","del","pvg","doh");
 
     private static final Set<String> ALLOWED_CLASSES =
             Set.of("economy", "premium economy", "business", "first");
 
-    /** Strict dd/MM/yyyy with leap-year rules (ResolverStyle.STRICT). */
+    /* Strict dd/MM/yyyy format check  with leap-year rules (ResolverStyle.STRICT). */
     private static final DateTimeFormatter STRICT_DDMMYYYY =
             new DateTimeFormatterBuilder()
                     .parseStrict()
@@ -34,7 +34,7 @@ public class FlightSearch {
                     .toFormatter()
                     .withResolverStyle(ResolverStyle.STRICT);
 
-    // ====== Core method (Activity 1.2) ======
+    // ====== Core Methods used (Activity part 1.2) ======
     public boolean runFlightSearch(
             String departureDate,
             String departureAirportCode,
@@ -46,7 +46,7 @@ public class FlightSearch {
             int childPassengerCount,
             int infantPassengerCount
     ) {
-        // ---- Precondition (spec note): all strings are provided in lowercase ----
+        // ---- Precondition : all strings are provided in lowercase ----
         if (!isLower(departureDate)
                 || !isLower(departureAirportCode)
                 || !isLower(returnDate)
@@ -98,7 +98,7 @@ public class FlightSearch {
         // ====== Condition 9: seating class must be one of ("economy","premium economy","business","first") ======
         if (!ALLOWED_CLASSES.contains(seatingClass)) return false;
 
-        // ====== Condition 10 (updated): only economy class can have an emergency row ======
+        // ====== Condition 10 : only economy class can have an emergency row ======
         // (All classes can be non-emergency.)
         if (emergencyRowSeating && !"economy".equals(seatingClass)) return false;
 
@@ -126,7 +126,7 @@ public class FlightSearch {
         return s != null && !s.isEmpty() && s.equals(s.toLowerCase());
     }
 
-    /** Parse a date string with STRICT dd/MM/yyyy rules; returns null on any failure. */
+    /* Parse a date string with STRICT dd/MM/yyyy rules; returns null on any failure. */
     private static LocalDate parseStrict(String ddMMyyyy) {
         try {
             return LocalDate.parse(ddMMyyyy, STRICT_DDMMYYYY);
@@ -135,7 +135,7 @@ public class FlightSearch {
         }
     }
 
-    // ====== Getters (for tests / Note 7) ======
+    // ====== Getters ======
     public String  getDepartureDate()          { return departureDate; }
     public String  getDepartureAirportCode()   { return departureAirportCode; }
     public boolean isEmergencyRowSeating()     { return emergencyRowSeating; }
